@@ -12,7 +12,7 @@ async function getCities(countryCode: string) {
     );
     return res.data;
   } catch (err: any) {
-    console.error(`❌ Failed for ${countryCode}:`, err.message);
+    console.error(`Failed for ${countryCode}:`, err.message);
     return [];
   }
 }
@@ -21,7 +21,7 @@ export async function exportCitiesToExcel() {
   const rows: any[] = [];
 
   for (const country of countries) {
-    console.log(`🌍 Fetching cities for ${country.label} (${country.value})`);
+    console.log(`Fetching cities for ${country.label} (${country.value})`);
     const cities = await getCities(country.value);
 
     cities.forEach((city: any) => {
@@ -39,5 +39,27 @@ export async function exportCitiesToExcel() {
   XLSX.utils.book_append_sheet(workbook, worksheet, "Cities");
 
   XLSX.writeFile(workbook, "cities.xlsx");
-  console.log("✅ cities.xlsx created successfully!");
+  console.log("cities.xlsx created successfully!");
+}
+
+export async function exportCitiesToJSON() {
+  const countryData: any[] = [];
+
+  for (const country of countries) {
+    console.log(`Fetching cities for ${country.label} (${country.value})`);
+    const cities = await getCities(country.value);
+
+    const formattedCities = cities.map((city: any) => ({
+      cityId: city.id,
+      name: city.name,
+    }));
+
+    countryData.push({
+      country: country.label,
+      code: country.value,
+      cities: formattedCities,
+    });
+  }
+
+  return { countryData };
 }
